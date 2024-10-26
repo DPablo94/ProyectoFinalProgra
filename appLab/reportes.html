@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>EMPLEADO</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+
+<body>
+    <div class="full-box page-header" style="background-color: rgb(71, 120, 211);">
+        <h2 class="text-center">
+            <i class="fab fa-dashcube fa-fw"></i> &nbsp; 
+        </h2>
+        <p class="text-justify">
+        </p>
+    </div>
+
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <div class="container-fluid">
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+              <li class="nav-item">
+                <a class="nav-link" href="home_empleado.html">MENU </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="reportes_trazabilidad.html">REPORTE DE TRAZABILIDA</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="reportes_solicitudes.html">REPORTE DE SOLICITUDES</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="reportes_muestra.html">REPORTE DE MUESTRAS</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+    
+    <div id="app5" align="center" width="200">
+        <div>
+            <div class="full-box page-header">
+                <h2 class="text-center">
+                    <i class="fab fa-dashcube fa-fw"></i> &nbsp; REPORTE POR ESTADO DE MUESTRA
+                </h2>
+                <p class="text-justify">
+                </p>
+            </div>
+            <br>
+            <div style="text-align: left;" class="col-md-4">
+                <div class="form-group">
+                    <label for="fecha_in">DESDE:</label>
+                    <input type="date" class="form-control" id="fecha_in" name="fecha_in" v-model="fecha_ingreso"/>
+                </div>
+                <div class="form-group">
+                    <label for="fecha_fin">HASTA:</label>
+                    <input type="date" class="form-control" id="fecha_fin" name="fecha_fin"/>
+                </div>
+                <div class="form-group">
+                    <label for="estadoMuestra" class="form-label">ESTADO DE MUESTRA:</label>
+                    <select class="form-select" id="estadoMuestra" v-model="id_estado_muestra">
+                      <option selected>Selecciona un Estado</option>
+                      <option value="1">RE-Registrada</option>
+                      <option value="2">AN-En Analisis</option>
+                      <option value="3">AE-Analisis Externo</option>
+                      <option value="4">DS-Devuelta a solicitante interno</option>
+                      <option value="5">ECT-Consumo Total</option>
+                      <option value="6">TA-Traslado Almacenamiento</option>
+                      <option value="7">BG-En Bodega</option>
+                      <option value="8">EN-En Notificacion</option>
+                      <option value="9">DV-Devuelta al Interesado</option>
+                      <option value="10">DE-Muestra Destruida</option>
+                      <option value="11">IO-Inactivación de Oficio</option>
+                      <option value="12">RC-Rechazada</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="muestra">No. MUESTRA:</label>
+                    <input type="search" class="form-control" id="muestra" name="muestra"  maxlength="3" placeholder="No. de Muestra"  v-model="id_solicitud"/>
+                </div>
+                <div class="form-group">
+                    <label for="tipoSolic" class="form-label">TIPO SOLICITUD:</label>
+                    <select class="form-select" id="tipoSolic" v-model="id_tipo_solicitud">
+                      <option selected>Selecciona un Tipo de Solicitud</option>
+                      <option value="1">Muestra para Analisis</option>
+                      <option value="2">Solicitud sin Muestra</option>
+                    </select>
+                </div>
+                <br>
+                <div class="form-group">
+                    <button value="Buscar" @click="obtenerSolicitud();" class="btn btn-success">BUSCAR</button>
+                    <button id="reload" value="reload" class="btn btn-warning">LIMPIAR</button>
+                </div>            
+        </div>
+    </div>
+        <br>
+    <div >
+        <table id="table" class="table">
+            <thead align="left">
+                <th scope="col">NO. SOLICITUD:</th>
+                <th scope="col">NO. MUESTRA:</th>
+                <th scope="col">ESTADO MUESTRA:</th>
+                <th scope="col">ESTADO SOLICITUD:</th>
+                <th scope="col">FECHA INGRESO:</th>
+                <th scope="col">CANT. MUESTRA:</th>
+                <th scope="col">TIPO DE SOLICITUD:</th>
+                <th scope="col">NIT PROVEEDOR:</th>
+                <th scope="col">PROVEEDOR:</th>
+                <th scope="col">SOLICITANTE:</th>
+                <th scope="col">ANALISTA ASIGNADO:</th>
+                <th scope="col">DESCRIPCION:</th>
+            </thead>
+            <tbody class="table-group-divider">
+                <tr v-for="(solicitudes, index) in solicitudes">
+                    <td> {{ solicitudes.id_solicitud }} </td>
+                    <td> {{ solicitudes.id_solicitud }} </td>
+                    <td> {{ solicitudes.nombre_es_muestra }} </td>
+                    <td> {{ solicitudes.nombre_es_solicitud }} </td>
+                    <td> {{ solicitudes.fecha_ingreso }} </td>
+                    <td> {{ solicitudes.cant_muestras }} </td>
+                    <td> {{ solicitudes.nombre_solicitud }} </td>
+                    <td> {{ solicitudes.nit_proveedor }} </td>
+                    <td> {{ solicitudes.nombre_proveedor }} </td>
+                    <td> {{ solicitudes.nombre_solicitante }} </td>
+                    <td> {{ solicitudes.nombre_usuario }} </td>
+                    <td> {{ solicitudes.desc_muestra }} </td>
+                </tr>
+            </tbody>
+            <button onclick="imprimirPDF()" class="btn btn-success"><i></i>&nbsp;Descargar PDF</button>
+            &nbsp;&nbsp;
+            <button onclick="exportarXLS()" class="btn btn-success"><i></i>&nbsp;Descargar XLS</button> 
+        </table>
+        <br>
+    </div>
+</div>
+    <script>
+        var app5 = new Vue({
+            el: '#app5',
+            data: {
+                solicitudes: [],
+                id_solicitud: '',
+                id_estado_muestra: '',
+                id_estado_solicitud: '',
+                fecha_ingreso : '',
+                cant_muestras: '',
+                id_tipo_solicitud:'',
+                nit_proveedor: '',
+                nombre_proveedor: '',
+                nombre_solicitante:'',
+                nombre_usuario: '',
+                desc_muestra: ''
+            },
+            methods: {
+                obtenerSolicitud: function() {
+                var fecha_ingreso = this.fecha_ingreso;
+                var id_estado_muestra = this.id_estado_muestra;
+                var id_solicitud = this.id_solicitud;
+                var id_tipo_solicitud = this.id_tipo_solicitud;
+
+                if(fecha_ingreso !== '' ) {
+                    axios.post('api3.php', {
+                    request: 3,
+                    fecha_ingreso: fecha_ingreso
+                 })
+                 .then(response => {
+                    // Actualiza el estado con los datos recibidos
+                     this.solicitudes = response.data;
+                    if (response.data.length === 0) {
+                    alert('No se encontraron solicitudes para el dato proporcionado.');
+                    }
+                 })
+                .catch(error => {
+                     console.error(error);
+                     alert('Ocurrió un error al obtener los datos. Por favor, intenta de nuevo.');
+                    });
+                } 
+
+                if(id_estado_muestra !== '' ) {
+                    axios.post('api3.php', {
+                    request: 4,
+                    id_estado_muestra: id_estado_muestra
+                 })
+                 .then(response => {
+                    // Actualiza el estado con los datos recibidos
+                     this.solicitudes = response.data;
+                    if (response.data.length === 0) {
+                    alert('No se encontraron solicitudes para el dato proporcionado.');
+                    }
+                 })
+                .catch(error => {
+                     console.error(error);
+                     alert('Ocurrió un error al obtener los datos. Por favor, intenta de nuevo.');
+                    });
+                }
+
+                if(id_solicitud !== '' ) {
+                    axios.post('api3.php', {
+                    request: 5,
+                    id_solicitud: id_solicitud
+                 })
+                 .then(response => {
+                    // Actualiza el estado con los datos recibidos
+                     this.solicitudes = response.data;
+                    if (response.data.length === 0) {
+                    alert('No se encontraron solicitudes para el dato proporcionado.');
+                    }
+                 })
+                .catch(error => {
+                     console.error(error);
+                     alert('Ocurrió un error al obtener los datos. Por favor, intenta de nuevo.');
+                    });
+                } 
+
+                if(id_tipo_solicitud !== '' ) {
+                    axios.post('api3.php', {
+                    request: 6,
+                    id_tipo_solicitud: id_tipo_solicitud
+                 })
+                 .then(response => {
+                    // Actualiza el estado con los datos recibidos
+                     this.solicitudes = response.data;
+                    if (response.data.length === 0) {
+                    alert('No se encontraron solicitudes para el dato proporcionado.');
+                    }
+                 })
+                .catch(error => {
+                     console.error(error);
+                     alert('Ocurrió un error al obtener los datos. Por favor, intenta de nuevo.');
+                    });
+                } 
+
+                },
+
+                
+            },
+
+            created: function() {
+                this.obtenerSolicitud();
+            }
+        })
+    </script>
+
+    <script>
+        function imprimirPDF() {
+          var element = document.getElementById('table');
+          html2pdf()
+            .set({
+              margin: 10,
+              filename: 'Rep_por_estado.pdf',
+              image: { type: 'jpeg', quality: 0.98 },
+              html2canvas: { dpi: 192, letterRendering: true },
+              jsPDF: { unit: 'pt', format: 'legal', orientation: 'landscape' } 
+              //jsPDF: { unit: 'pt', format: 'a4', orientation: 'portrait' }
+            })
+            .from(element)
+            .save();
+        }
+    </script>
+
+    <script>
+        const reload = document.getElementById("reload");
+        reload.addEventListener("click", (_) => {
+        location.reload();
+        });
+    </script>
+
+    <script>
+        function exportarXLS() {
+            const table = document.getElementById('table');
+            const workbook = XLSX.utils.table_to_book(table, { sheet: "Reporte" });
+            XLSX.writeFile(workbook, 'Rep_por_estado.xlsx');
+        }
+    </script>
+
+</body>
+
+</html>

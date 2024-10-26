@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>EMPLEADO</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+
+<body>
+    <div class="full-box page-header" style="background-color: rgb(71, 120, 211);">
+        <h2 class="text-center">
+            <i class="fab fa-dashcube fa-fw"></i> &nbsp; 
+        </h2>
+        <p class="text-justify">
+        </p>
+    </div>
+
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <div class="container-fluid">
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+              <li class="nav-item">
+                <a class="nav-link" href="home_empleado.html">MENU </a>
+              </li>
+              <li class="nav-item"></li>
+                <a class="nav-link" href="reportes.html">REPORTE POR ESTADO</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="reportes_solicitudes.html">REPORTE DE SOLICITUDES</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="reportes_muestra.html">REPORTE DE MUESTRAS</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+    
+    <div id="app6" align="center" width="200">
+        <div>
+            <div class="full-box page-header">
+                <h2 class="text-center">
+                    <i class="fab fa-dashcube fa-fw"></i> &nbsp; REPORTE POR TRAZABILIDAD DE MUESTRA
+                </h2>
+                <p class="text-justify">
+                </p>
+            </div>
+            <br>
+            <div style="text-align: left;" class="col-md-4">
+                <div class="form-group">
+                    <label for="muestra">No. MUESTRA:</label>
+                    <input type="search" class="form-control" id="muestra" name="muestra"  maxlength="3" placeholder="No. de Muestra"  v-model="id_solicitud"/>
+                </div>
+                <br>
+                <div class="form-group">
+                    <button value="Buscar" @click="obtenerSolicitudBitacora();" class="btn btn-success">BUSCAR</button>
+                    <button id="reload" value="reload" class="btn btn-warning">LIMPIAR</button>
+                </div>            
+        </div>
+    </div>
+        <br>
+    <div >
+        <table id="table" class="table">
+            <thead align="left">
+                <th scope="col">NO. MUESTRA</th>
+                <th scope="col">NOMBRE USUARIO</th>
+                <th scope="col">ROL</th>
+                <th scope="col">NO.</th>
+                <th scope="col">ESTADO ANTERIOR</th>
+                <th scope="col">ESTADO NUEVO</th>
+                <th scope="col">FECHA </th>    
+            </thead>
+            <tbody class="table-group-divider">
+                <tr v-for="(bitacora_solicitud, index) in bitacora_solicitud">
+                    <td> {{ bitacora_solicitud.id_solicitud }} </td>
+                    <td> {{ bitacora_solicitud.nombre_usuario }} </td>
+                    <td> {{ bitacora_solicitud.nombre_rol }} </td>
+                    <td> {{ bitacora_solicitud.id_bitacora }} </td>
+                    <td> {{ bitacora_solicitud.estado_anterio }} </td>
+                    <td> {{ bitacora_solicitud.estado_nuevo }} </td>
+                    <td> {{ bitacora_solicitud.fecha }} </td>
+                </tr>
+            </tbody>
+            <button onclick="imprimirPDF()" class="btn btn-success"><i></i>&nbsp;Descargar PDF</button>
+            &nbsp;&nbsp;
+            <button onclick="exportarXLS()" class="btn btn-success"><i></i>&nbsp;Descargar XLS</button>
+ 
+        </table>
+        <br>
+    </div>
+</div>
+    <script>
+        var app6 = new Vue({
+            el: '#app6',
+            data: {
+                bitacora_solicitud: [],
+                id_bitacora: '',
+                id_solicitud: '',
+                nombre_usuario: '',
+                id_rol: '',
+                accion: '',
+                fecha: '',
+                fecha_nuevo: '',
+                nombre_rol: '',
+                estado_anterio: '',
+                estado_nuevo: ''
+            },
+            methods: {
+                obtenerSolicitudBitacora: function() {
+                var id_solicitud = this.id_solicitud;
+
+                if(id_solicitud !== '' ) {
+                    axios.post('api2.php', {
+                    request: 2,
+                    id_solicitud: id_solicitud
+                 })
+                 .then(response => {
+                    // Actualiza el estado con los datos recibidos
+                     this.bitacora_solicitud = response.data;
+                    if (response.data.length === 0) {
+                    alert('No se encontraron solicitudes para el dato proporcionado.');
+                    }
+                 })
+                .catch(error => {
+                     console.error(error);
+                     alert('Ocurrió un error al obtener los datos. Por favor, intenta de nuevo.');
+                    });
+                }
+
+                },
+   
+            },
+
+            created: function() {
+                this.obtenerSolicitudBitacora();
+            }
+        })
+    </script>
+
+    <script>
+        function imprimirPDF() {
+          var element = document.getElementById('table');
+          html2pdf()
+            .set({
+              margin: 10,
+              filename: 'Rep_de_Trazabilidad.pdf',
+              image: { type: 'jpeg', quality: 0.98 },
+              html2canvas: { dpi: 192, letterRendering: true },
+              jsPDF: { unit: 'pt', format: 'a4', orientation: 'landscape' } 
+              //jsPDF: { unit: 'pt', format: 'a4', orientation: 'portrait' }
+            })
+            .from(element)
+            .save();
+        }
+    </script>
+
+    <script>
+        const reload = document.getElementById("reload");
+        reload.addEventListener("click", (_) => {
+        location.reload();
+        });
+    </script>
+
+<script>
+    function exportarXLS() {
+        const table = document.getElementById('table');
+        const workbook = XLSX.utils.table_to_book(table, { sheet: "Reporte" });
+        XLSX.writeFile(workbook, 'Rep_de_Trazabilidad.xlsx');
+    }
+</script>
+
+</body>
+
+</html>
